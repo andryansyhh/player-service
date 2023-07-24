@@ -14,8 +14,7 @@ type UserRepo interface {
 	CreateUser(req models.CreateUser) error
 	Login(username string) (*models.User, error)
 	GetUserByUuid(uuid string) (*models.User, error)
-	GetAllUsers() ([]models.ResponseUser, error)
-	FindAllTopup(req models.ListRequest) (paging models.JsonResponse, res []models.ResponseUser, err error)
+	FindAllUser(req models.ListRequest) (paging models.JsonResponse, res []models.ResponseUserScanner, err error)
 }
 
 func (u *PlayerRepository) CreateUser(req models.CreateUser) error {
@@ -76,14 +75,14 @@ func (r *PlayerRepository) GetAllUsers() ([]models.ResponseUser, error) {
 	return res, nil
 }
 
-func (r *PlayerRepository) FindAllTopup(req models.ListRequest) (paging models.JsonResponse, res []models.ResponseUser, err error) {
-	query := `"user".uuid, "user".username, "user".email, "user".phone, "user".created_at, "user".updated_at, "user".deleted_at, 
+func (r *PlayerRepository) FindAllUser(req models.ListRequest) (paging models.JsonResponse, res []models.ResponseUserScanner, err error) {
+	query := `"user".uuid, "user".username, "user".email, "user".phone, "user".created_at, "user".updated_at, "user".deleted_at,
 	user_wallet.wallet, user_wallet.bank_name, user_wallet.account_number, user_wallet.account_name`
 
 	q := r.db.Debug().
 		Model(models.User{}).
 		Select(query).
-		Joins(`JOIN user_wallet on user_wallet.user_uuid = "user".uuid`)
+		Joins(`LEFT JOIN user_wallet on user_wallet.user_uuid = "user".uuid`)
 
 	for _, v := range req.Search {
 		switch v.Field {
@@ -120,26 +119,30 @@ func (r *PlayerRepository) FindAllTopup(req models.ListRequest) (paging models.J
 	} else {
 		q = q.Order("\"user\".created_at DESC")
 	}
-	if paging.Page == 0 {
-		paging.Page = 1
+	if req.Page == 0 {
+		req.Page = 1
 	}
 	if req.Limit == 0 {
 		req.Limit = 20
 	}
-	offset := (paging.Page - 1) * req.Limit
+	offset := (req.Page - 1) * req.Limit
 	if offset < 0 {
 		offset = 0
 	}
 
-	var total int64
-
 	q = q.Order(sortBy)
-	q.Count(&total)
-	q = q.Offset(int(offset))
-	q = q.Limit(int(req.Limit))
-	if err := q.Scan(&res).
-		Error; err != nil {
+	q.Count(&paging.TotalObjs)
+	q = q.Offset(offset)
+	q = q.Limit(req.Limit)
+	if err := q.Scan(&res).Error; err != nil {
 		return paging, nil, err
+	}
+
+	paging.Page = req.Page
+	paging.PerPage = req.Limit
+	paging.TotalPage = int(paging.TotalObjs+int64(req.Limit)-1) / req.Limit
+	if paging.TotalPage <= 0 {
+		paging.TotalPage = 1
 	}
 
 	return paging, res, nil

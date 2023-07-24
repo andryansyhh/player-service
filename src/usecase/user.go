@@ -109,47 +109,44 @@ func (u PlayerUsecase) GetUserByUuid(userUuid string) (*models.ResponseUser, err
 		return nil, errors.New("error get user data")
 	}
 
-	resUserWallet, err := u.repo.GetUserWalletByUserUuid(userUuid)
+	wallet, err := u.repo.GetallUserWalletsByUserUuid(userUuid)
 	if err != nil {
-		return nil, errors.New("error get wallet data")
+		return nil, err
 	}
 
 	return &models.ResponseUser{
-		Uuid:          resUser.Uuid,
-		Email:         resUser.Email,
-		Username:      resUser.Username,
-		Phone:         resUser.Phone,
-		CreatedAt:     pq.NullTime{Time: resUser.CreatedAt.Time},
-		UpdatedAt:     pq.NullTime{Time: resUser.UpdatedAt.Time},
-		DeletedAt:     pq.NullTime{Time: resUser.DeletedAt.Time},
-		Wallet:        resUserWallet.Wallet,
-		AccountNumber: resUserWallet.AccountNumber,
-		BankName:      resUserWallet.BankName,
-		AccountName:   resUserWallet.AccountName,
+		Uuid:       resUser.Uuid,
+		Email:      resUser.Email,
+		Username:   resUser.Username,
+		Phone:      resUser.Phone,
+		CreatedAt:  pq.NullTime{Time: resUser.CreatedAt.Time},
+		UpdatedAt:  pq.NullTime{Time: resUser.UpdatedAt.Time},
+		DeletedAt:  pq.NullTime{Time: resUser.DeletedAt.Time},
+		UserWallet: wallet,
 	}, nil
 }
 
 func (u PlayerUsecase) GetAllUsers(req models.ListRequest) (*models.JsonResponse, error) {
-	paging, res, err := u.repo.FindAllTopup(req)
+	paging, res, err := u.repo.FindAllUser(req)
 	if err != nil {
 		return nil, err
 	}
 
 	data := []models.ResponseUser{}
 	for _, res := range res {
-
+		wallet, err := u.repo.GetallUserWalletsByUserUuid(res.Uuid)
+		if err != nil {
+			return nil, err
+		}
 		userData := models.ResponseUser{
-			Uuid:          res.Uuid,
-			Email:         res.Email,
-			Username:      res.Username,
-			Phone:         res.Phone,
-			CreatedAt:     pq.NullTime{Time: res.CreatedAt.Time},
-			UpdatedAt:     pq.NullTime{Time: res.UpdatedAt.Time},
-			DeletedAt:     pq.NullTime{Time: res.DeletedAt.Time},
-			Wallet:        res.Wallet,
-			AccountNumber: res.AccountNumber,
-			BankName:      res.BankName,
-			AccountName:   res.AccountName,
+			Uuid:       res.Uuid,
+			Email:      res.Email,
+			Username:   res.Username,
+			Phone:      res.Phone,
+			CreatedAt:  pq.NullTime{Time: res.CreatedAt.Time},
+			UpdatedAt:  pq.NullTime{Time: res.UpdatedAt.Time},
+			DeletedAt:  pq.NullTime{Time: res.DeletedAt.Time},
+			UserWallet: wallet,
 		}
 
 		data = append(data, userData)

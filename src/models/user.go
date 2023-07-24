@@ -26,17 +26,28 @@ type CreateUser struct {
 }
 
 type ResponseUser struct {
-	Uuid          string      `gorm:"primaryKey;size:36;" json:"uuid"`
-	CreatedAt     pq.NullTime `gorm:"created_at" json:"created_at"`
-	UpdatedAt     pq.NullTime `gorm:"updated_at" json:"updated_at"`
-	DeletedAt     pq.NullTime `gorm:"deleted_at" json:"deleted_at"`
-	Username      string      `gorm:"username" json:"username"`
-	Email         string      `gorm:"email" json:"email"`
-	Phone         string      `gorm:"phone" json:"phone"`
-	Wallet        float64     `json:"wallet"`
-	AccountNumber string      `json:"account_number"`
-	BankName      string      `json:"bank_name"`
-	AccountName   string      `json:"account_name"`
+	Uuid       string               `gorm:"primaryKey;size:36;" json:"uuid"`
+	CreatedAt  pq.NullTime          `gorm:"created_at" json:"created_at"`
+	UpdatedAt  pq.NullTime          `gorm:"updated_at" json:"updated_at"`
+	DeletedAt  pq.NullTime          `gorm:"deleted_at" json:"deleted_at"`
+	Username   string               `gorm:"username" json:"username"`
+	Email      string               `gorm:"email" json:"email"`
+	Phone      string               `gorm:"phone" json:"phone"`
+	UserWallet []UserWalletResponse `json:"user_wallet"`
+	// Wallet        float64     `json:"wallet"`
+	// AccountNumber string      `json:"account_number"`
+	// BankName      string      `json:"bank_name"`
+	// AccountName   string      `json:"account_name"`
+}
+
+type ResponseUserScanner struct {
+	Uuid      string      `gorm:"primaryKey;size:36;" json:"uuid"`
+	CreatedAt pq.NullTime `gorm:"created_at" json:"created_at"`
+	UpdatedAt pq.NullTime `gorm:"updated_at" json:"updated_at"`
+	DeletedAt pq.NullTime `gorm:"deleted_at" json:"deleted_at"`
+	Username  string      `gorm:"username" json:"username"`
+	Email     string      `gorm:"email" json:"email"`
+	Phone     string      `gorm:"phone" json:"phone"`
 }
 
 type Login struct {
