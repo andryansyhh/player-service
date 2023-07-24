@@ -12,8 +12,15 @@ type UserWalletUsecase interface {
 }
 
 func (u *PlayerUsecase) CreateUserWallet(req models.CreateUserWallet) error {
+	userWallet, err := u.repo.GetUserWalletByUserUuid(req.UserUuid)
+	if err != nil {
+		return err
+	}
+	if req.AccountNumber == userWallet.AccountNumber {
+		return errors.New("account number already resgistered")
+	}
 	req.Wallet = 0
-	err := u.repo.CreateUserWallet(req)
+	err = u.repo.CreateUserWallet(req)
 	if err != nil {
 		return err
 	}

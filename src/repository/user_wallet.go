@@ -10,6 +10,7 @@ type UserWalletRepo interface {
 	CreateUserWallet(req models.CreateUserWallet) error
 	GetUserWalletByUserUuid(user_uuid string) (*models.UserWallet, error)
 	UpdateUserWallet(req models.TopupUserWallet, userUuid string) error
+	GetallUserWalletsByUserUuid(user_uuid string) ([]models.UserWalletResponse, error)
 }
 
 func (u *PlayerRepository) CreateUserWallet(req models.CreateUserWallet) error {
@@ -21,6 +22,7 @@ func (u *PlayerRepository) CreateUserWallet(req models.CreateUserWallet) error {
 		Wallet:        req.Wallet,
 		UserUuid:      req.UserUuid,
 		BankName:      req.BankName,
+		AccountName:   req.AccountName,
 	}
 
 	createUserWallet.Uuid = uuid.New().String()
@@ -79,4 +81,16 @@ func (r *PlayerRepository) GetUserWalletByUserUuid(user_uuid string) (*models.Us
 	}
 
 	return &res, nil
+}
+
+func (r *PlayerRepository) GetallUserWalletsByUserUuid(user_uuid string) ([]models.UserWalletResponse, error) {
+	var res []models.UserWalletResponse
+	if err := r.db.Debug().
+		Model(models.UserWallet{}).
+		Where("user_wallet.user_uuid = ?", user_uuid).
+		Scan(&res).Error; err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

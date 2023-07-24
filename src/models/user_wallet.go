@@ -25,10 +25,20 @@ type CreateUserWallet struct {
 	Wallet        float64 `json:"wallet"`
 	AccountNumber string  `json:"account_number"`
 	BankName      string  `json:"bank_name"`
+	AccountName   string  `json:"account_name"`
 }
 
 type TopupUserWallet struct {
 	Amount float64 `json:"amount"`
+}
+
+type UserWalletResponse struct {
+	Uuid          string  `gorm:"primaryKey;size:36;" json:"uuid"`
+	UserUuid      string  `gorm:"user_uuid" json:"user_uuid"`
+	Wallet        float64 `gorm:"wallet" json:"wallet"`
+	AccountNumber string  `gorm:"account_number" json:"account_number"`
+	BankName      string  `gorm:"bank_name" json:"bank_name"`
+	AccountName   string  `gorm:"account_name" json:"account_name"`
 }
 
 func (m *UserWallet) TableName() string {
